@@ -47,7 +47,8 @@ function Invoke-TervosOracleSOAJobMonitoring {
 
     $JobsThatDontNeedToRun = "WarrantyOrderJob", "WebWarrantyJob", "WOMZRJob", "ImageIntJob"
 
-    $JobsNotWorking = $SchedulerJobs | 
+    $JobsNotWorking = @()
+    $JobsNotWorking += $SchedulerJobs | 
     Where-Object Name -NotIn $JobsThatDontNeedToRun |
     Where-Object TimeAfterWhichToTriggerAlert -lt (Get-Date)
 
