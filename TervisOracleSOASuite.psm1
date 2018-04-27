@@ -1,36 +1,4 @@
-﻿Invoke-PSDepend -Import -Force
-
-function Get-SOASchedulerURL {
-    if ($env:SOASchedulerURL) {
-        $env:SOASchedulerURL
-    } else {
-        $Script:SOASchedulerURL
-    }
-}
-
-function Set-SOASchedulerURL {
-    param (
-        $SOASchedulerURL
-    )
-    $Script:SOASchedulerURL = $SOASchedulerURL
-}
-
-function Get-NotificationEmailAddress {
-    if ($env:NotificationEmailAddress) {
-        $env:NotificationEmailAddress
-    } else {
-        $Script:NotificationEmailAddress
-    }
-}
-
-function Set-NotificationEmailAddress {
-    param (
-        $NotificationEmailAddress
-    )
-    $Script:NotificationEmailAddress = $NotificationEmailAddress
-}
-
-function Invoke-SchedulerJobParseDate {
+﻿function Invoke-SchedulerJobParseDate {
     begin {
         $DateFormat = "ddd MMM dd HH:mm:ss EDT yyyy"
     }
@@ -44,7 +12,10 @@ function Invoke-SchedulerJobParseDate {
 }
 
 function Get-SOASchedulerJob {
-    $xml = Invoke-RestMethod -Uri (Get-SOASchedulerURL)
+    param (
+        $URL
+    )
+    $xml = Invoke-RestMethod -Uri $URL
     $CleanedUpXML = $xml -replace '&nbsp;',''
     $Table = [xml]$CleanedUpXML
  
@@ -66,6 +37,12 @@ function Get-SOASchedulerJob {
 }
 
 function Invoke-TervosOracleSOAJobMonitoring {
+    param (
+        $SOASchedulerURL,
+        $EmailTo,
+        $EmailFrom
+
+    )
     $SchedulerJobs = Get-SOASchedulerJob 
 
     $JobsThatDontNeedToRun = "WarrantyOrderJob", "WebWarrantyJob", "WOMZRJob", "ImageIntJob"
@@ -77,7 +54,7 @@ function Invoke-TervosOracleSOAJobMonitoring {
     if ($JobsNotWorking) {
         $OFSBackup = $OFS
         $OFS = ""
-        Send-TervisMailMessage -To $env:NotificationEmailAddress -From $env:NotificationEmailAddress -Subject "SOA Jobs failing" -BodyAsHTML -Body @"
+        Send-TervisMailMessage -To $EmailTo -From $EmailFrom -Subject "SOA Jobs failing" -BodyAsHTML -Body @"
 $($JobsNotWorking | ConvertTo-Html)
 "@
         $OFS = $OFSBackup
