@@ -43,13 +43,17 @@ function Invoke-TervosOracleSOAJobMonitoring {
         $EmailFrom
 
     )
-    $SchedulerJobs = Get-SOASchedulerJob 
+    $SchedulerJobs = Get-SOASchedulerJob -URL $SOASchedulerURL
 
     $JobsThatDontNeedToRun = "WarrantyOrderJob", "WebWarrantyJob", "WOMZRJob", "ImageIntJob"
 
     $JobsNotWorking = $SchedulerJobs | 
     Where-Object Name -NotIn $JobsThatDontNeedToRun |
     Where-Object TimeAfterWhichToTriggerAlert -lt (Get-Date)
+
+    $JobsNotWorking += $SchedulerJobs | 
+    Where-Object Name -In $JobsThatDontNeedToRun |
+    Where-Object NextRun -NE "null"
 
     if ($JobsNotWorking) {
         $OFSBackup = $OFS
