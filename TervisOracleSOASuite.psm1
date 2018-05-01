@@ -36,7 +36,7 @@ function Get-SOASchedulerJob {
     }
 }
 
-function Invoke-TervosOracleSOAJobMonitoring {
+function Invoke-TervisOracleSOAJobMonitoring {
     param (
         $SOASchedulerURL,
         $NotificationEmail,
