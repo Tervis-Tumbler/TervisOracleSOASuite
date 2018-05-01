@@ -39,27 +39,25 @@ function Get-SOASchedulerJob {
 function Invoke-TervosOracleSOAJobMonitoring {
     param (
         $SOASchedulerURL,
-        $EmailTo,
-        $EmailFrom
-
+        $NotificationEmail,
+        $EnvironmentName,
+        $JobsThatShouldBeDisabled
     )
     $SchedulerJobs = Get-SOASchedulerJob -URL $SOASchedulerURL
 
-    $JobsThatDontNeedToRun = "WarrantyOrderJob", "WebWarrantyJob", "WOMZRJob", "ImageIntJob"
-
     $JobsNotWorking = @()
     $JobsNotWorking += $SchedulerJobs | 
-    Where-Object Name -NotIn $JobsThatDontNeedToRun |
+    Where-Object Name -NotIn $JobsThatShouldBeDisabled |
     Where-Object TimeAfterWhichToTriggerAlert -lt (Get-Date)
 
     $JobsNotWorking += $SchedulerJobs | 
-    Where-Object Name -In $JobsThatDontNeedToRun |
+    Where-Object Name -In $JobsThatShouldBeDisabled |
     Where-Object NextRun -NE "null"
 
     if ($JobsNotWorking) {
         $OFSBackup = $OFS
         $OFS = ""
-        Send-TervisMailMessage -To $EmailTo -From $EmailFrom -Subject "SOA Jobs failing" -BodyAsHTML -Body @"
+        Send-TervisMailMessage -To $NotificationEmail -From $NotificationEmail -Subject "$EnvironmentName SOA Jobs failing" -BodyAsHTML -Body @"
 $($JobsNotWorking | ConvertTo-Html)
 "@
         $OFS = $OFSBackup
