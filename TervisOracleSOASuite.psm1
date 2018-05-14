@@ -85,16 +85,14 @@ function Get-TervisSOASchedulerJob {
 function Invoke-TervisOracleSOAJobMonitoring {
     [cmdletbinding(SupportsShouldProcess=$True)]
     param (
-        [Parameter(Mandatory)]$SOASchedulerURL,
-        [Parameter(Mandatory)]$NotificationEmail,
         [Parameter(Mandatory)]$EnvironmentName
     )
     $SOAEnvironment = Get-SOAEnvironment -Name $EnvironmentName
-    $SchedulerJobs = Get-SOASchedulerJob -URL $SOASchedulerURL
+    $SchedulerJobs = Get-TervisSOASchedulerJob -URL $SOAEnvironment.SOASchedulerURL
 
     $JobsNotWorking = @()
     $JobsNotWorking += $SchedulerJobs | 
-    Where-Object Name -NotIn $JobsThatShouldBeDisabled |
+    Where-Object Name -NotIn $SOAEnvironment.JobsThatShouldBeDisabled |
     Where-Object TimeAfterWhichToTriggerAlert -lt (Get-Date)
     
     $JobsNotWorking += $SchedulerJobs | 
@@ -104,7 +102,7 @@ function Invoke-TervisOracleSOAJobMonitoring {
     if ($JobsNotWorking) {
         $OFSBackup = $OFS
         $OFS = ""
-        Send-TervisMailMessage -To $NotificationEmail -From $NotificationEmail -Subject "$EnvironmentName SOA Jobs failing" -BodyAsHTML -Body @"
+        Send-TervisMailMessage -To $SOAEnvironment.NotificationEmail -From $SOAEnvironment.NotificationEmail -Subject "$($SOAEnvironment.Name) SOA Jobs failing" -BodyAsHTML -Body @"
 $($JobsNotWorking | ConvertTo-Html)
 
 
