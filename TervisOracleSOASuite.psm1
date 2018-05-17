@@ -2,7 +2,7 @@
     Name = "Production"
     NotificationEmail = "SOAIssues@tervis.com"
     SOASchedulerURL = "http://soaweblogic.production.tervis.prv:7201/SOAScheduler/soaschedulerservlet?action=read"
-    JobsThatShouldBeDisabled = "WarrantyOrderJob","WOMZRJob","ImageIntJob"
+    JobsThatShouldBeDisabled = "WarrantyOrderJob","WOMZRJob","ImageIntJob","WebWarrantyJob"
     JobsWithNonStandardIntervalBeyondExpectedRuntimeToTriggerAlert = [PSCustomObject]@{
         Name = "UpdateCustomerFromCRMJob"
         NumberOfIntervalsAfterWhichToTriggerAlert = 30
